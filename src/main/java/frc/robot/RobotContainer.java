@@ -36,6 +36,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Robot subsystems creation.
     driveTrain = new DriveTrain();
+    exampleSubsystem = new ExampleSubsystem();
     
     // Controller setup.
     xboxController = new XboxController(Controller.kPort);
