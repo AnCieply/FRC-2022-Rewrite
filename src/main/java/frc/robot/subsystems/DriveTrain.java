@@ -19,6 +19,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
+
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -119,12 +120,22 @@ public class DriveTrain extends SubsystemBase {
         driveTrain.arcadeDrive(velocity, rotation);
     }
 
-    public double getArcadeVelocity() {
-        return velocity;
-    }
-
-    public double getArcadeRotation() {
-        return rotation;
+    public void invertDriveTrain() {
+        leftSideInverted = !leftSideInverted;
+        rightSideInverted = !rightSideInverted;
+        gyroReversed = !gyroReversed;
+        frontLeftMotor.setInverted(leftSideInverted);
+        backLeftMotor.setInverted(leftSideInverted);
+        frontRightMotor.setInverted(rightSideInverted);
+        backRightMotor.setInverted(rightSideInverted);
+        isReversed = !isReversed;
+        if (isReversed) {
+            driveTrain = new DifferentialDrive(frontRightMotor, frontLeftMotor);
+            driveTrain.setSafetyEnabled(false);
+        } else {
+            driveTrain = new DifferentialDrive(frontLeftMotor, frontRightMotor);
+            driveTrain.setSafetyEnabled(false);
+        }
     }
 
     public void setMaxSpeed(double maxSpeed) {
@@ -148,74 +159,6 @@ public class DriveTrain extends SubsystemBase {
         driveTrain.feed();
     }
 
-    // Returns wheel speeds in m/s.
-    public DifferentialDriveWheelSpeeds getDriveWheelSpeeds() {
-        double leftRotationsPerSecond = (double) getLeftEncoderVelocity() / Drive.kEncoderResolution / Drive.kGearRatio * 10;        
-        double leftVelocity = leftRotationsPerSecond * 2 * Math.PI * Units.inchesToMeters(Drive.kWheelRadius);
-        double rightRotationsPerSecond = (double) getRightEncoderVelocity() / Drive.kEncoderResolution / Drive.kGearRatio * 10;        
-        double rightVelocity = rightRotationsPerSecond * 2 * Math.PI * Units.inchesToMeters(Drive.kWheelRadius);
-        return new DifferentialDriveWheelSpeeds(leftVelocity, rightVelocity);
-    }
-
-    public Rotation2d getHeading() {
-        return Rotation2d.fromDegrees((gyroReversed) ? -gyro.getAngle() : gyro.getAngle());
-    }
-
-    public double getLeftWheelDistance() {
-        double leftDistance = ((double) getLeftEncoderPosition()) / Drive.kEncoderResolution / Drive.kGearRatio * 2 * Math.PI * Units.inchesToMeters(Drive.kWheelRadius);
-        return leftDistance;
-    }
-
-    public double getRightWheelDistance() {
-        double rightDistance = ((double) getRightEncoderPosition()) / Drive.kEncoderResolution / Drive.kGearRatio * 2 * Math.PI * Units.inchesToMeters(Drive.kWheelRadius);
-        return rightDistance;
-    }
-
-    public double getLeftEncoderPosition() {
-        return frontLeftMotor.getSelectedSensorPosition();
-    }
-    
-    public double getRightEncoderPosition() {
-        return frontRightMotor.getSelectedSensorPosition();
-    }
-    
-    public double getLeftEncoderVelocity() {
-        return frontLeftMotor.getSelectedSensorVelocity();
-    }
-    
-    public double getRightEncoderVelocity() {
-        return frontRightMotor.getSelectedSensorVelocity();
-    }
-
-    public DifferentialDriveKinematics getDriveTrainKinematics() {
-        return driveTrainKinema;
-    }
-    
-      public DifferentialDriveOdometry getDriveTrainOdometry() {
-        return driveTrainOdo;
-    }
-
-    public SimpleMotorFeedforward getSimpleMotorFeedForward() {
-        return feedForward;
-    }
-    
-    public PIDController getLeftPIDController() {
-        return leftPIDController;
-    }
-    
-    public PIDController getRightPIDController() {
-        return rightPIDController;
-    }
-    
-    // Returns the position of the robot in the field.
-    public Pose2d getPose() {
-        return driveTrainOdo.getPoseMeters();
-    }
-    
-    public double getGyroAngle() {
-        return gyroReversed ? -gyro.getAngle() : gyro.getAngle();
-    }
-
     // Reset Functions
     public void resetOdometry(Pose2d pose) {
         resetEncoders();
@@ -233,21 +176,67 @@ public class DriveTrain extends SubsystemBase {
         gyro.reset();
     }
 
-    public void invertDriveTrain() {
-        leftSideInverted = !leftSideInverted;
-        rightSideInverted = !rightSideInverted;
-        gyroReversed = !gyroReversed;
-        frontLeftMotor.setInverted(leftSideInverted);
-        backLeftMotor.setInverted(leftSideInverted);
-        frontRightMotor.setInverted(rightSideInverted);
-        backRightMotor.setInverted(rightSideInverted);
-        isReversed = !isReversed;
-        if (isReversed) {
-            driveTrain = new DifferentialDrive(frontRightMotor, frontLeftMotor);
-            driveTrain.setSafetyEnabled(false);
-        } else {
-            driveTrain = new DifferentialDrive(frontLeftMotor, frontRightMotor);
-            driveTrain.setSafetyEnabled(false);
-        }
+    /*
+        Everything below is getters.
+    */
+
+    public double getArcadeVelocity() {
+        return velocity;
+    }
+
+    public double getArcadeRotation() {
+        return rotation;
+    }
+
+    // Returns wheel speeds in meters/second.
+    public DifferentialDriveWheelSpeeds getDriveWheelSpeeds() {
+        double leftRotationsPerSecond = (double) getLeftEncoderVelocity() / Drive.kEncoderResolution / Drive.kGearRatio * 10;        
+        double leftVelocity = leftRotationsPerSecond * 2 * Math.PI * Units.inchesToMeters(Drive.kWheelRadius);
+        double rightRotationsPerSecond = (double) getRightEncoderVelocity() / Drive.kEncoderResolution / Drive.kGearRatio * 10;        
+        double rightVelocity = rightRotationsPerSecond * 2 * Math.PI * Units.inchesToMeters(Drive.kWheelRadius);
+        return new DifferentialDriveWheelSpeeds(leftVelocity, rightVelocity);
+    }
+
+    public double getLeftWheelDistance() {
+        double leftDistance = ((double) getLeftEncoderPosition()) / Drive.kEncoderResolution / Drive.kGearRatio * 2 * Math.PI * Units.inchesToMeters(Drive.kWheelRadius);
+        return leftDistance;
+    }
+
+    public double getRightWheelDistance() {
+        double rightDistance = ((double) getRightEncoderPosition()) / Drive.kEncoderResolution / Drive.kGearRatio * 2 * Math.PI * Units.inchesToMeters(Drive.kWheelRadius);
+        return rightDistance;
+    }
+
+    public double getLeftEncoderPosition() { return frontLeftMotor.getSelectedSensorPosition(); }
+    
+    public double getRightEncoderPosition() { return frontRightMotor.getSelectedSensorPosition(); }
+    
+    public double getLeftEncoderVelocity() { return frontLeftMotor.getSelectedSensorVelocity(); }
+    
+    public double getRightEncoderVelocity() { return frontRightMotor.getSelectedSensorVelocity(); }
+
+    public DifferentialDriveKinematics getDriveTrainKinematics() { return driveTrainKinema; }
+    
+    public DifferentialDriveOdometry getDriveTrainOdometry() { return driveTrainOdo; }
+
+    public SimpleMotorFeedforward getSimpleMotorFeedForward() { return feedForward; }
+    
+    public PIDController getLeftPIDController() { return leftPIDController; }
+    
+    public PIDController getRightPIDController() { return rightPIDController; }
+    
+    // Returns the position and rotation of the robot in the field.
+    public Pose2d getPose() {
+        return driveTrainOdo.getPoseMeters();
+    }
+    
+    // Returns positive rotation of the robot in degrees as a point on the unit circle.
+    public Rotation2d getHeading() {
+        return Rotation2d.fromDegrees((gyroReversed) ? -gyro.getAngle() : gyro.getAngle());
+    }
+
+    // Returns positive rotation of the robot as a double.
+    public double getGyroAngle() {
+        return gyroReversed ? -gyro.getAngle() : gyro.getAngle();
     }
 }
