@@ -207,22 +207,18 @@ public class DriveTrain extends SubsystemBase {
         return rightDistance;
     }
 
+    // Encoder positions.
     public double getLeftEncoderPosition() { return frontLeftMotor.getSelectedSensorPosition(); }
-    
     public double getRightEncoderPosition() { return frontRightMotor.getSelectedSensorPosition(); }
-    
+    // Encoder velocities.
     public double getLeftEncoderVelocity() { return frontLeftMotor.getSelectedSensorVelocity(); }
-    
     public double getRightEncoderVelocity() { return frontRightMotor.getSelectedSensorVelocity(); }
-
+    // Drivetrain.
     public DifferentialDriveKinematics getDriveTrainKinematics() { return driveTrainKinema; }
-    
     public DifferentialDriveOdometry getDriveTrainOdometry() { return driveTrainOdo; }
-
+    // FF and PID.
     public SimpleMotorFeedforward getSimpleMotorFeedForward() { return feedForward; }
-    
     public PIDController getLeftPIDController() { return leftPIDController; }
-    
     public PIDController getRightPIDController() { return rightPIDController; }
     
     // Returns the position and rotation of the robot in the field.
