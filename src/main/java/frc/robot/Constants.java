@@ -58,4 +58,13 @@ public final class Constants {
         public static final double kVelocityMax = 0.9144; // 6 ft/s
         public static final double kAcclerationMax = 0.6096; // 4 ft/s^2
     }
+
+    public static final class ShooterConst {
+        // CAN ids.
+        public static final int kLeaderMotorID = 5;
+        public static final int kFollowerMotorID = 6;
+    
+        // Default inversion.
+        public static final boolean kFrontMotorInvert = true;
+    }
 }
